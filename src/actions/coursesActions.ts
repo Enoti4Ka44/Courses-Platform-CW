@@ -1,6 +1,7 @@
-import { Course } from "@/types/course";
+import { Assignment, Course, Material } from "@/types/course";
 import { query } from "@/utils/db";
 
+// Получить все курсы
 export async function getCourses(
   searchQuery?: string,
   sort?: string,
@@ -27,4 +28,70 @@ export async function getCourses(
 
   const result = await query<Course>(sql, params);
   return result.rows;
+}
+
+// Получить курс по id для страницы самого курса (с материалами и заданиями)
+export async function getCourseDetails(courseId: number) {
+  const courseRes = await query<Course>(
+    `
+    SELECT c.*, t.full_name as teacher_name 
+    FROM courses c 
+    JOIN teachers t ON c.teacher_id = t.id 
+    WHERE c.id = $1`,
+    [courseId],
+  );
+
+  const materialsRes = await query<Material[]>(
+    `SELECT * FROM materials WHERE course_id = $1 ORDER BY id ASC`,
+    [courseId],
+  );
+  const assignmentsRes = await query<Assignment[]>(
+    `SELECT * FROM assignments WHERE course_id = $1 ORDER BY id ASC`,
+    [courseId],
+  );
+
+  return {
+    course: courseRes.rows[0],
+    materials: materialsRes.rows,
+    assignments: assignmentsRes.rows,
+  };
+}
+
+// Добавить материал (для учителя)
+export async function addMaterial(
+  courseId: number,
+  title: string,
+  content: string,
+  fileUrl?: string,
+) {
+  await query(
+    "INSERT INTO materials (course_id, title, content, file_url) VALUES ($1, $2, $3, $4)",
+    [courseId, title, content, fileUrl || null],
+  );
+}
+
+// Добавить задание (для учителя)
+export async function addAssignment(
+  courseId: number,
+  title: string,
+  description: string,
+  dueDate: string,
+) {
+  await query(
+    "INSERT INTO assignments (course_id, title, description, due_date) VALUES ($1, $2, $3, $4)",
+    [courseId, title, description, dueDate],
+  );
+}
+
+// Сдать задание (для студента)
+export async function submitAssignment(
+  assignmentId: number,
+  studentId: number,
+  content: string,
+  fileUrl?: string,
+) {
+  await query(
+    "INSERT INTO submissions (assignment_id, student_id, content, file_url) VALUES ($1, $2, $3, $4)",
+    [assignmentId, studentId, content, fileUrl || null],
+  );
 }

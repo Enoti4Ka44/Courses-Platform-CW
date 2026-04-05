@@ -2,6 +2,7 @@
 
 import { User } from "@/types/user";
 import { query } from "@/utils/db";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 export async function getAllTeachers(): Promise<User[]> {

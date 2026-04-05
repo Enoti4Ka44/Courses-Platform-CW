@@ -75,8 +75,9 @@ export default function Header({
           href="/"
           className="flex items-center gap-2 font-bold text-xl tracking-tighter mr-6"
         >
-          <span className="text-blue-600">Course</span>
-          <span className="text-slate-900">Platform</span>
+          <div className="text-green-600">
+            Course<span className="text-slate-900">Platform</span>
+          </div>
         </Link>
 
         <form
@@ -111,7 +112,7 @@ export default function Header({
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-slate-100 transition-colors focus:outline-none"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white text-xs font-bold">
               {currentUser ? (
                 currentUser.full_name[0].toUpperCase()
               ) : (
@@ -135,6 +136,15 @@ export default function Header({
 
           {isMenuOpen && (
             <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-slate-100 bg-white py-2 shadow-lg ring-1 ring-black/5">
+              <Link
+                href="/profile"
+                className="w-full flex items-center justify-between px-4 py-2 text-sm text-left hover:bg-slate-50 transition-colors"
+              >
+                Профиль
+              </Link>
+
+              <div className="my-1 border-t border-slate-100" />
+
               <div className="px-3 py-2">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Учителя
@@ -151,7 +161,7 @@ export default function Header({
                       className={
                         currentUserId === teacher.id &&
                         currentUserRole === "teacher"
-                          ? "font-bold text-blue-600"
+                          ? "font-bold text-green-600"
                           : "text-slate-700"
                       }
                     >
@@ -159,7 +169,7 @@ export default function Header({
                     </span>
                     {currentUserId === teacher.id &&
                       currentUserRole === "teacher" && (
-                        <Check className="h-4 w-4 text-blue-600" />
+                        <Check className="h-4 w-4 text-green-600" />
                       )}
                   </button>
                 ))}
@@ -183,7 +193,7 @@ export default function Header({
                       className={
                         currentUserId === student.id &&
                         currentUserRole === "student"
-                          ? "font-bold text-blue-600"
+                          ? "font-bold text-green-600"
                           : "text-slate-700"
                       }
                     >
@@ -191,7 +201,7 @@ export default function Header({
                     </span>
                     {currentUserId === student.id &&
                       currentUserRole === "student" && (
-                        <Check className="h-4 w-4 text-blue-600" />
+                        <Check className="h-4 w-4 text-green-600" />
                       )}
                   </button>
                 ))}
