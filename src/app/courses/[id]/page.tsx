@@ -84,40 +84,38 @@ export default async function CoursePage({
             <p className="text-slate-400 italic">Материалов пока нет.</p>
           )}
         </div>
-        {isEnrolled === 1 && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-              <Calendar /> Задания
-            </h2>
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <Calendar /> Задания
+          </h2>
 
-            {isTeacher && <AssignmentForm courseId={courseId} />}
+          {isTeacher && <AssignmentForm courseId={courseId} />}
 
-            {assignments.map((assign: any) => (
-              <div
-                key={assign.id}
-                className="bg-slate-50 p-5 rounded-2xl border border-slate-200 relative"
-              >
-                {isTeacher && (
-                  <AssignmentModal assignment={assign} courseId={courseId} />
-                )}
+          {assignments.map((assign: any) => (
+            <div
+              key={assign.id}
+              className="bg-slate-50 p-5 rounded-2xl border border-slate-200 relative"
+            >
+              {isTeacher && (
+                <AssignmentModal assignment={assign} courseId={courseId} />
+              )}
 
-                <h4 className="font-bold text-slate-800 mb-1 pr-16">
-                  {assign.title}
-                </h4>
-                <p className="text-sm text-slate-600 mb-3">
-                  {assign.description}
-                </p>
-                <div className="text-xs font-bold mb-4">
-                  Срок: {new Date(assign.due_date).toLocaleDateString()}
-                </div>
-
-                {role === "student" && userId && (
-                  <SubmissionForm assignmentId={assign.id} studentId={userId} />
-                )}
+              <h4 className="font-bold text-slate-800 mb-1 pr-16">
+                {assign.title}
+              </h4>
+              <p className="text-sm text-slate-600 mb-3">
+                {assign.description}
+              </p>
+              <div className="text-xs font-bold mb-4">
+                Срок: {new Date(assign.due_date).toLocaleDateString()}
               </div>
-            ))}
-          </div>
-        )}
+
+              {role === "student" && userId && isEnrolled === 1 && (
+                <SubmissionForm assignmentId={assign.id} studentId={userId} />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </main>
   );
