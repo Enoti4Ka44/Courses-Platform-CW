@@ -167,9 +167,7 @@ export default async function ProfilePage() {
               </table>
             </div>
           ) : (
-            <p className="text-slate-400 italic">
-              Пока нет работ для проверки.
-            </p>
+            <p className="text-slate-400">Пока нет работ для проверки.</p>
           )}
         </div>
       )}
@@ -257,7 +255,7 @@ export default async function ProfilePage() {
                 </table>
               </div>
             ) : (
-              <p className="text-slate-500 bg-white p-6 rounded-2xl border border-slate-100 italic">
+              <p className="text-slate-500 bg-white p-6 rounded-2xl border border-slate-100">
                 Вы еще не отправляли ответов на задания.
               </p>
             )}

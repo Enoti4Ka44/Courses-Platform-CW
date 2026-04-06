@@ -81,7 +81,7 @@ export default async function CoursePage({
               </div>
             ))
           ) : (
-            <p className="text-slate-400 italic">Материалов пока нет.</p>
+            <p className="text-slate-400">Материалов пока нет.</p>
           )}
         </div>
         <div className="space-y-6">
