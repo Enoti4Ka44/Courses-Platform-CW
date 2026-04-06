@@ -9,16 +9,20 @@ import { redirect } from "next/navigation";
 import ProfileForm from "@/components/profile-form";
 import CourseCard from "@/components/course-card";
 import { Users, BookOpen, Trash, Trash2, ClipboardCheck } from "lucide-react";
-import { Course, Submission } from "@/types/course";
+import { Course, Submission, TeacherSubmission } from "@/types/course";
 import { CourseStudent } from "@/types/user";
 import {
   kickStudentFromCourse,
   unsubscribeFromCourse,
 } from "@/actions/enrollmentActions";
 import KickButton from "@/components/kick-button";
-import { getStudentSubmissions } from "@/actions/submissionsActions";
+import {
+  getStudentSubmissions,
+  getTeacherSubmissions,
+} from "@/actions/submissionsActions";
 import SubmissionModal from "@/components/submission-modal";
 import Link from "next/link";
+import GradeForm from "@/components/grade-form";
 
 export default async function ProfilePage() {
   const { id: currentUserId, role: currentUserRole } = await getCurrentUser();
@@ -36,22 +40,16 @@ export default async function ProfilePage() {
   let teacherCourses: Course[] = [];
   let teacherStudents: CourseStudent[] = [];
   let studentCourses: Course[] = [];
+  let teacherSubmissions: TeacherSubmission[] = [];
 
   if (currentUserRole === "teacher") {
     teacherCourses = await getTeacherCourses(currentUserId);
     teacherStudents = await getTeacherStudents(currentUserId);
+    teacherSubmissions = await getTeacherSubmissions(currentUserId);
   } else {
     studentCourses = await getStudentCourses(currentUserId);
     studentSubmissions = await getStudentSubmissions(currentUserId);
   }
-
-  const handleUnsubscribe = async (courseId: number, studentId: number) => {
-    await unsubscribeFromCourse(courseId, studentId);
-  };
-
-  const handleKickStudent = async (courseId: number, studentId: number) => {
-    await kickStudentFromCourse(courseId, studentId);
-  };
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -128,6 +126,51 @@ export default async function ProfilePage() {
               </p>
             )}
           </section>
+
+          {teacherSubmissions.length > 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 text-slate-700">
+                  <tr>
+                    <th className="px-6 py-4">Студент</th>
+                    <th className="px-6 py-4">Курс / Задание</th>
+                    <th className="px-6 py-4">Ответ</th>
+                    <th className="px-6 py-4 text-right">Статус</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {teacherSubmissions.map((sub: any) => (
+                    <tr
+                      key={sub.id}
+                      className="hover:bg-slate-50/50 transition-colors"
+                    >
+                      <td className="px-6 py-4 font-bold text-slate-900">
+                        {sub.student_name}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-xs text-green-600 font-medium uppercase">
+                          {sub.course_title}
+                        </div>
+                        <div className="text-slate-700">
+                          {sub.assignment_title}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 truncate max-w-[200px]">
+                        {sub.content}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <GradeForm submission={sub} teacherId={currentUserId} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-slate-400 italic">
+              Пока нет работ для проверки.
+            </p>
+          )}
         </div>
       )}
 
@@ -182,11 +225,12 @@ export default async function ProfilePage() {
                       <th className="px-6 py-4">Курс</th>
                       <th className="px-6 py-4">Задание</th>
                       <th className="px-6 py-4">Дата сдачи</th>
+                      <th className="px-6 py-4">Оценка</th>
                       <th className="px-6 py-4 text-right">Действия</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {studentSubmissions.map((sub: any) => (
+                    {studentSubmissions.map((sub) => (
                       <tr
                         key={sub.id}
                         className="hover:bg-slate-50/50 transition-colors"
@@ -199,6 +243,10 @@ export default async function ProfilePage() {
                         </td>
                         <td className="px-6 py-4 text-slate-500">
                           {new Date(sub.submitted_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-slate-500">
+                          {sub.score || "Не проверено"}{" "}
+                          {sub.feedback ? "/ " + sub.feedback : ""}
                         </td>
                         <td className="px-6 py-4 flex justify-end">
                           <SubmissionModal submission={sub} />
