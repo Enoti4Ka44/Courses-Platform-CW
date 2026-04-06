@@ -1,7 +1,10 @@
 import { getCurrentUser } from "@/actions/authActions";
-import { getCourseDetails } from "@/actions/coursesActions";
+import { getCourseDetails, isStudentEnrolled } from "@/actions/coursesActions";
 import AssignmentForm from "@/components/assignment-form";
+import AssignmentModal from "@/components/assignment-modal";
+import EnrollButton from "@/components/enroll-button";
 import MaterialForm from "@/components/material-form";
+import MaterialModal from "@/components/material-modal";
 import SubmissionForm from "@/components/submission-form";
 import {
   FileText,
@@ -9,6 +12,7 @@ import {
   Calendar,
   GraduationCap,
   PlusCircle,
+  User,
 } from "lucide-react";
 
 export default async function CoursePage({
@@ -24,24 +28,28 @@ export default async function CoursePage({
   if (!course) return <div className="p-10 text-center">Курс не найден</div>;
 
   const isTeacher = role === "teacher" && course.teacher_id === userId;
+  const isEnrolled = userId && (await isStudentEnrolled(courseId, userId));
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white mb-8 shadow-xl">
+      <div className="relative bg-gradient-to-r from-green-600 to-emerald-700 rounded-3xl p-8 text-white mb-8 shadow-xl">
         <h1 className="text-4xl font-black mb-4">{course.title}</h1>
-        <p className="text-blue-100 text-lg mb-6 max-w-2xl">
+        <p className="text-green-100 text-lg mb-6 max-w-2xl">
           {course.description}
         </p>
         <div className="flex items-center gap-2 text-sm font-medium bg-white/10 w-fit px-4 py-2 rounded-full backdrop-blur-sm">
-          <GraduationCap size={18} />
+          <User size={18} />
           Преподаватель: {course.teacher_name}
         </div>
+        {!isTeacher && !isEnrolled && userId && (
+          <EnrollButton student_id={userId} course_id={courseId} />
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <FileText className="text-blue-600" /> Учебные материалы
+            <FileText /> Учебные материалы
           </h2>
 
           {isTeacher && <MaterialForm courseId={courseId} />}
@@ -50,9 +58,13 @@ export default async function CoursePage({
             materials.map((mat: any) => (
               <div
                 key={mat.id}
-                className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative"
               >
-                <h3 className="text-xl font-bold text-slate-800 mb-2">
+                {isTeacher && (
+                  <MaterialModal material={mat} courseId={courseId} />
+                )}
+
+                <h3 className="text-xl font-bold text-slate-800 mb-2 pr-16">
                   {mat.title}
                 </h3>
                 <p className="text-slate-600 whitespace-pre-wrap mb-4">
@@ -72,33 +84,40 @@ export default async function CoursePage({
             <p className="text-slate-400 italic">Материалов пока нет.</p>
           )}
         </div>
+        {isEnrolled === 1 && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+              <Calendar /> Задания
+            </h2>
 
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <Calendar className="text-orange-500" /> Задания
-          </h2>
+            {isTeacher && <AssignmentForm courseId={courseId} />}
 
-          {isTeacher && <AssignmentForm courseId={courseId} />}
+            {assignments.map((assign: any) => (
+              <div
+                key={assign.id}
+                className="bg-slate-50 p-5 rounded-2xl border border-slate-200 relative"
+              >
+                {isTeacher && (
+                  <AssignmentModal assignment={assign} courseId={courseId} />
+                )}
 
-          {assignments.map((assign: any) => (
-            <div
-              key={assign.id}
-              className="bg-slate-50 p-5 rounded-2xl border border-slate-200"
-            >
-              <h4 className="font-bold text-slate-800 mb-1">{assign.title}</h4>
-              <p className="text-sm text-slate-600 mb-3">
-                {assign.description}
-              </p>
-              <div className="text-xs text-orange-600 font-bold mb-4">
-                Срок: {new Date(assign.due_date).toLocaleDateString()}
+                <h4 className="font-bold text-slate-800 mb-1 pr-16">
+                  {assign.title}
+                </h4>
+                <p className="text-sm text-slate-600 mb-3">
+                  {assign.description}
+                </p>
+                <div className="text-xs font-bold mb-4">
+                  Срок: {new Date(assign.due_date).toLocaleDateString()}
+                </div>
+
+                {role === "student" && userId && (
+                  <SubmissionForm assignmentId={assign.id} studentId={userId} />
+                )}
               </div>
-
-              {role === "student" && userId && (
-                <SubmissionForm assignmentId={assign.id} studentId={userId} />
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

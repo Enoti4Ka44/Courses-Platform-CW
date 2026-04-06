@@ -9,7 +9,6 @@ import { addMaterial } from "@/actions/coursesActions";
 export default function MaterialForm({ courseId }: { courseId: number }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [isPending, setIsPending] = useState(false);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -17,7 +16,6 @@ export default function MaterialForm({ courseId }: { courseId: number }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsPending(true);
 
     try {
       await addMaterial(courseId, title, content, fileUrl);
@@ -28,8 +26,6 @@ export default function MaterialForm({ courseId }: { courseId: number }) {
       router.refresh();
     } catch (error) {
       alert("Ошибка при добавлении материала");
-    } finally {
-      setIsPending(false);
     }
   };
 
@@ -37,7 +33,7 @@ export default function MaterialForm({ courseId }: { courseId: number }) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-all justify-center font-medium"
+        className="flex items-center gap-2 w-full py-4 border-2 border-dashed border rounded-2xl text-slate-500 cursor-pointer justify-center font-medium"
       >
         <Plus size={20} /> Добавить учебный материал
       </button>
@@ -45,10 +41,10 @@ export default function MaterialForm({ courseId }: { courseId: number }) {
   }
 
   return (
-    <div className="bg-white border border-blue-100 rounded-2xl p-6 shadow-sm ring-4 ring-blue-50/50">
+    <div className="bg-white rounded-2xl p-6 ">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-          <FilePlus className="text-blue-600" size={20} /> Новый материал
+          <FilePlus size={20} /> Новый материал
         </h3>
         <button
           onClick={() => setIsOpen(false)}
@@ -69,7 +65,7 @@ export default function MaterialForm({ courseId }: { courseId: number }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Напр: Введение в SQL"
-            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-blue-500 outline-none transition-all"
+            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-green-500 outline-none transition-all"
           />
         </div>
 
@@ -82,7 +78,7 @@ export default function MaterialForm({ courseId }: { courseId: number }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Текст лекции или описание..."
-            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-blue-500 outline-none h-32 resize-none transition-all"
+            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-green-500 outline-none h-32 resize-none transition-all"
           />
         </div>
 
@@ -95,22 +91,21 @@ export default function MaterialForm({ courseId }: { courseId: number }) {
             value={fileUrl}
             onChange={(e) => setFileUrl(e.target.value)}
             placeholder="https://example.com/presentation.pdf"
-            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-blue-500 outline-none transition-all"
+            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-green-500 outline-none transition-all"
           />
         </div>
 
         <div className="flex gap-3 pt-2">
           <button
             type="submit"
-            disabled={isPending}
-            className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="flex-1 bg-green-600 cursor-pointer text-white py-2.5 rounded-xl font-bold"
           >
-            {isPending ? "Сохранение..." : "Опубликовать материал"}
+            Опубликовать материал
           </button>
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="px-6 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+            className="px-6 py-2.5 cursor-pointer rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors"
           >
             Отмена
           </button>

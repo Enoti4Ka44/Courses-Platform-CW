@@ -1,3 +1,5 @@
+"use server";
+
 import { Assignment, Course, Material } from "@/types/course";
 import { query } from "@/utils/db";
 
@@ -91,7 +93,60 @@ export async function submitAssignment(
   fileUrl?: string,
 ) {
   await query(
-    "INSERT INTO submissions (assignment_id, student_id, content, file_url) VALUES ($1, $2, $3, $4)",
+    `INSERT INTO submissions (assignment_id, student_id, content, file_url) 
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (assignment_id, student_id) 
+     DO UPDATE SET 
+        content = EXCLUDED.content, 
+        file_url = EXCLUDED.file_url,
+        submitted_at = CURRENT_TIMESTAMP`,
     [assignmentId, studentId, content, fileUrl || null],
+  );
+}
+
+// Проверка является ли пользователь студентом этого курса
+export async function isStudentEnrolled(courseId: number, studentId: number) {
+  const res = await query(
+    "SELECT 1 FROM enrollments WHERE course_id = $1 AND student_id = $2",
+    [courseId, studentId],
+  );
+  return res.rowCount;
+}
+
+// Удалить материал (для учителя)
+export async function deleteMaterial(id: number, courseId: number) {
+  await query("DELETE FROM materials WHERE id = $1", [id]);
+}
+
+// Удалить задание (для учителя)
+export async function deleteAssignment(id: number, courseId: number) {
+  await query("DELETE FROM assignments WHERE id = $1", [id]);
+}
+
+// Обновить материал (для учителя)
+export async function updateMaterial(
+  id: number,
+  courseId: number,
+  title: string,
+  content: string,
+  fileUrl: string,
+) {
+  await query(
+    "UPDATE materials SET title = $1, content = $2, file_url = $3 WHERE id = $4",
+    [title, content, fileUrl, id],
+  );
+}
+
+//Изменить задание (для учителя)
+export async function updateAssignment(
+  id: number,
+  courseId: number,
+  title: string,
+  description: string,
+  dueDate: string,
+) {
+  await query(
+    "UPDATE assignments SET title = $1, description = $2, due_date = $3 WHERE id = $4",
+    [title, description, dueDate, id],
   );
 }

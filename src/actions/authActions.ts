@@ -37,6 +37,7 @@ export async function loginAsUser(userId: number, role: "teacher" | "student") {
   const cookieStore = await cookies();
   cookieStore.set("current_user_id", userId.toString(), { path: "/" });
   cookieStore.set("current_user_role", role, { path: "/" });
+  revalidatePath("/profile");
 }
 
 export async function logout() {

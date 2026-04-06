@@ -24,3 +24,15 @@ export interface Assignment {
   file_url?: string;
   due_date: Date;
 }
+
+export interface Submission {
+  id: number;
+  assignment_id: number;
+  assignment_title: string;
+  course_title: string;
+  course_id: number;
+  student_id: number;
+  content: string;
+  file_url: string;
+  submitted_at: Date;
+}

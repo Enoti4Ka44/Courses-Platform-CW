@@ -8,14 +8,17 @@ import {
 import { redirect } from "next/navigation";
 import ProfileForm from "@/components/profile-form";
 import CourseCard from "@/components/course-card";
-import { Users, BookOpen, Trash, Trash2 } from "lucide-react";
-import { Course } from "@/types/course";
+import { Users, BookOpen, Trash, Trash2, ClipboardCheck } from "lucide-react";
+import { Course, Submission } from "@/types/course";
 import { CourseStudent } from "@/types/user";
 import {
   kickStudentFromCourse,
   unsubscribeFromCourse,
 } from "@/actions/enrollmentActions";
 import KickButton from "@/components/kick-button";
+import { getStudentSubmissions } from "@/actions/submissionsActions";
+import SubmissionModal from "@/components/submission-modal";
+import Link from "next/link";
 
 export default async function ProfilePage() {
   const { id: currentUserId, role: currentUserRole } = await getCurrentUser();
@@ -29,6 +32,7 @@ export default async function ProfilePage() {
     return <div className="p-8 text-center">Пользователь не найден</div>;
   }
 
+  let studentSubmissions: Submission[] = [];
   let teacherCourses: Course[] = [];
   let teacherStudents: CourseStudent[] = [];
   let studentCourses: Course[] = [];
@@ -38,6 +42,7 @@ export default async function ProfilePage() {
     teacherStudents = await getTeacherStudents(currentUserId);
   } else {
     studentCourses = await getStudentCourses(currentUserId);
+    studentSubmissions = await getStudentSubmissions(currentUserId);
   }
 
   const handleUnsubscribe = async (courseId: number, studentId: number) => {
@@ -127,33 +132,89 @@ export default async function ProfilePage() {
       )}
 
       {currentUserRole === "student" && (
-        <section>
-          <div className="flex items-center gap-2 mb-6">
-            <BookOpen className="text-emerald-600" />
-            <h2 className="text-2xl font-bold text-slate-800">Мое обучение</h2>
-          </div>
+        <>
+          <section>
+            <div className="flex items-center gap-2 mb-6">
+              <BookOpen className="text-emerald-600" />
+              <h2 className="text-2xl font-bold text-slate-800">
+                Мое обучение
+              </h2>
+            </div>
 
-          {studentCourses.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {studentCourses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  studentId={currentUserId}
-                />
-              ))}
+            {studentCourses.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {studentCourses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    studentId={currentUserId}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
+                <p className="text-lg text-slate-600 mb-4">
+                  Вы пока не записаны ни на один курс.
+                </p>
+                <Link
+                  href="/"
+                  className="bg-green-600 text-white px-6 py-2 rounded-xl font-medium hover:bg-green-700 transition-colors"
+                >
+                  Найти курсы
+                </Link>
+              </div>
+            )}
+          </section>
+
+          <section className="mt-8">
+            <div className="flex items-center gap-2 mb-6">
+              <ClipboardCheck className="text-green-600" />
+              <h2 className="text-2xl font-bold text-slate-800">
+                Мои выполненные задания
+              </h2>
             </div>
-          ) : (
-            <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-              <p className="text-lg text-slate-600 mb-4">
-                Вы пока не записаны ни на один курс.
+
+            {studentSubmissions.length > 0 ? (
+              <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-slate-700 font-medium">
+                    <tr>
+                      <th className="px-6 py-4">Курс</th>
+                      <th className="px-6 py-4">Задание</th>
+                      <th className="px-6 py-4">Дата сдачи</th>
+                      <th className="px-6 py-4 text-right">Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {studentSubmissions.map((sub: any) => (
+                      <tr
+                        key={sub.id}
+                        className="hover:bg-slate-50/50 transition-colors"
+                      >
+                        <td className="px-6 py-4 font-medium text-slate-900">
+                          {sub.course_title}
+                        </td>
+                        <td className="px-6 py-4 text-slate-600">
+                          {sub.assignment_title}
+                        </td>
+                        <td className="px-6 py-4 text-slate-500">
+                          {new Date(sub.submitted_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 flex justify-end">
+                          <SubmissionModal submission={sub} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-slate-500 bg-white p-6 rounded-2xl border border-slate-100 italic">
+                Вы еще не отправляли ответов на задания.
               </p>
-              <button className="bg-green-600 text-white px-6 py-2 rounded-xl font-medium hover:bg-green-700 transition-colors">
-                Найти курсы
-              </button>
-            </div>
-          )}
-        </section>
+            )}
+          </section>
+        </>
       )}
     </main>
   );

@@ -92,7 +92,7 @@ export default function Header({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Поиск курсов..."
-            className="w-full rounded-full bg-slate-100 border border-transparent py-2 pl-10 pr-10 text-sm outline-none transition-colors focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+            className="w-full rounded-full bg-slate-100 border border-transparent py-2 pl-10 pr-10 text-sm outline-none transition-colors focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-100"
           />
           {searchQuery && (
             <X
