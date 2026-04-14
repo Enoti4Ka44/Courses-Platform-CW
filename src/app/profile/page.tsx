@@ -23,6 +23,7 @@ import {
 import SubmissionModal from "@/components/submission-modal";
 import Link from "next/link";
 import GradeForm from "@/components/grade-form";
+import CreateCourseForm from "@/components/create-course-form";
 
 export default async function ProfilePage() {
   const { id: currentUserId, role: currentUserRole } = await getCurrentUser();
@@ -54,7 +55,12 @@ export default async function ProfilePage() {
   return (
     <main className="container mx-auto px-4 py-8 max-w-7xl">
       <h1 className="text-3xl font-black text-slate-900 mb-8">Мой профиль</h1>
-      <ProfileForm user={user} role={currentUserRole} />
+      <div className="grid lg:grid-cols-2 gap-8 mb-8">
+        <ProfileForm user={user} role={currentUserRole} />
+        {currentUserRole === "teacher" && (
+          <CreateCourseForm teacherId={currentUserId} />
+        )}
+      </div>
 
       {currentUserRole === "teacher" && (
         <div className="space-y-12">

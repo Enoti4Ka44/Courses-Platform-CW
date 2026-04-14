@@ -37,7 +37,7 @@ export default function ProfileForm({ user, role }: ProfileFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 max-w-2xl mb-8"
+      className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
     >
       <h3 className="text-lg font-bold text-slate-800 mb-4">
         Настройки профиля

@@ -2,6 +2,7 @@
 
 import { Assignment, Course, Material } from "@/types/course";
 import { query } from "@/utils/db";
+import { revalidatePath } from "next/cache";
 
 // Получить все курсы
 export async function getCourses(
@@ -57,6 +58,28 @@ export async function getCourseDetails(courseId: number) {
     materials: materialsRes.rows,
     assignments: assignmentsRes.rows,
   };
+}
+
+// Создать курс
+export async function createCourse(
+  teacherId: number,
+  title: string,
+  description: string,
+) {
+  try {
+    const res = await query(
+      "INSERT INTO courses (teacher_id, title, description) VALUES ($1, $2, $3) RETURNING id",
+      [teacherId, title, description],
+    );
+
+    revalidatePath("/profile");
+    revalidatePath("/courses");
+
+    return { success: true, courseId: res.rows[0].id };
+  } catch (error) {
+    console.error("Ошибка при создании курса:", error);
+    return { success: false, error: "Не удалось создать курс" };
+  }
 }
 
 // Добавить материал (для учителя)
